@@ -1,57 +1,103 @@
 d3.dsvFormat(';');
 
-//Cores dos generos
+//Cores dos generos - Paleta otimizada para Visualização de Informação
+// Cores únicas, alto contraste, e semanticamente apropriadas
 const genreColorsBase = {
-    'pop': '#E91E63',
-    'rock': '#9C27B0',
-    'hip hop': '#FF5722',
-    'hip-hop': '#FF5722',
-    'rap': '#FF5722',
-    'k-pop': '#00BCD4',
-    'kpop': '#00BCD4',
-    'electronic': '#00BCD4',
-    'edm': '#00BCD4',
-    'dance': '#00BCD4',
-    'jazz': '#FFC107',
-    'classical': '#8BC34A',
-    'country': '#FF9800',
-    'r&b': '#3F51B5',
-    'rnb': '#3F51B5',
-    'latin': '#F44336',
-    'reggaeton': '#F44336',
-    'metal': '#607D8B',
-    'indie': '#CDDC39',
-    'folk': '#795548',
-    'soul': '#9C27B0',
-    'blues': '#3F51B5',
-    'punk': '#E91E63',
-    'alternative': '#9C27B0',
-    'trap': '#FF5722',
-    'house': '#00BCD4'
+    // Pop e variantes - Rosa/Magenta
+    'pop': '#FF1493',           // Deep Pink
+    'k-pop': '#FF69B4',         // Hot Pink
+    'kpop': '#FF69B4',
+    'dance pop': '#C71585',     // Medium Violet Red
+    
+    // Rock e variantes - Roxo/Violeta
+    'rock': '#8B00FF',          // Violet
+    'alternative': '#9370DB',    // Medium Purple
+    'indie': '#BA55D3',         // Medium Orchid
+    'punk': '#DA70D6',          // Orchid
+    
+    // Hip Hop/Rap - Laranja/Coral
+    'hip hop': '#FF4500',       // Orange Red
+    'hip-hop': '#FF4500',
+    'rap': '#FF6347',           // Tomato
+    'trap': '#FF7F50',          // Coral
+    
+    // Electronic/Dance - Ciano/Azul elétrico
+    'electronic': '#00CED1',    // Dark Turquoise
+    'edm': '#00FFFF',           // Cyan
+    'dance': '#1E90FF',         // Dodger Blue
+    'house': '#4169E1',         // Royal Blue
+    'techno': '#0080FF',        // Light Blue
+    
+    // Jazz e Soul - Amarelo/Dourado
+    'jazz': '#FFD700',          // Gold
+    'soul': '#FFA500',          // Orange
+    'funk': '#FF8C00',          // Dark Orange
+    
+    // R&B - Azul profundo
+    'r&b': '#4682B4',           // Steel Blue
+    'rnb': '#4682B4',
+    
+    // Latin - Vermelho vibrante
+    'latin': '#DC143C',         // Crimson
+    'reggaeton': '#FF0000',     // Red
+    'salsa': '#B22222',         // Fire Brick
+    
+    // Country/Folk - Marrom/Terra
+    'country': '#D2691E',       // Chocolate
+    'folk': '#A0522D',          // Sienna
+    
+    // Classical - Verde claro
+    'classical': '#32CD32',     // Lime Green
+    
+    // Metal - Cinza escuro
+    'metal': '#778899',         // Light Slate Gray
+    'heavy metal': '#696969',   // Dim Gray
+    
+    // Blues - Azul índigo
+    'blues': '#483D8B',         // Dark Slate Blue
+    
+    // Reggae - Verde
+    'reggae': '#00FF00',        // Lime
+    
+    // Outros
+    'ambient': '#20B2AA',       // Light Sea Green
+    'gospel': '#F0E68C',        // Khaki
+    'disco': '#FF00FF'          // Magenta
 };
 
 function getGenreColor(genre) {
-    if (!genre) return '#888';
+    if (!genre) return '#888888';
     
     const normalized = genre.toLowerCase().trim();
     
+    // Procura exata
     if (genreColorsBase[normalized]) {
         return genreColorsBase[normalized];
     }
     
+    // Procura parcial (para subgéneros)
     for (let key in genreColorsBase) {
         if (normalized.includes(key) || key.includes(normalized)) {
             return genreColorsBase[key];
         }
     }
     
+    // Gerar cor única baseada em hash (melhorada para visualização)
     let hash = 0;
     for (let i = 0; i < normalized.length; i++) {
         hash = normalized.charCodeAt(i) + ((hash << 5) - hash);
     }
     
-    const hue = Math.abs(hash % 360);
-    return `hsl(${hue}, 70%, 55%)`;
+    // Paleta expandida com cores bem distintas
+    const distinctColors = [
+        '#FF1493', '#8B00FF', '#00CED1', '#FFD700', '#FF4500',
+        '#32CD32', '#FF69B4', '#4169E1', '#DC143C', '#9370DB',
+        '#00FFFF', '#FF6347', '#BA55D3', '#D2691E', '#4682B4',
+        '#FF7F50', '#00FF00', '#483D8B', '#FFA500', '#1E90FF'
+    ];
+    
+    const colorIndex = Math.abs(hash) % distinctColors.length;
+    return distinctColors[colorIndex];
 }
 
 const genreColors = new Proxy({}, {

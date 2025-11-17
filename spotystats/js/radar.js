@@ -12,14 +12,16 @@ function createRadarChart() {
     
     const artistSelect = d3.select('#artist-select');
     
+    // Título da seção
     artistSelect.append('label')
         .style('display', 'block')
         .style('margin-bottom', '12px')
         .style('font-size', '14px')
         .style('font-weight', '600')
         .style('color', '#1DB954')
-        .text('Select artists to compare (max 4):');    
+        .text('Select artists to compare (max 4):');
     
+    // Container para os chips selecionados
     artistSelect.append('div')
         .attr('id', 'artist-chips')
         .attr('class', 'selected-artists-chips')
@@ -27,13 +29,21 @@ function createRadarChart() {
         .style('flex-wrap', 'wrap')
         .style('gap', '8px')
         .style('margin-bottom', '12px')
-        .style('min-height', '40px')
-        .style('padding', '8px')
-        .style('background', 'rgba(42, 42, 42, 0.3)')
+        .style('min-height', '0')
+        .style('padding', '0')
+        .style('background', 'transparent')
         .style('border-radius', '8px');
     
-    const dropdown = artistSelect.append('select')
-        .attr('id', 'artist-dropdown')
+    // Container de pesquisa
+    const searchContainer = artistSelect.append('div')
+        .style('position', 'relative')
+        .style('margin-bottom', '12px');
+    
+    // Input de pesquisa
+    const searchInput = searchContainer.append('input')
+        .attr('type', 'text')
+        .attr('id', 'artist-search-input')
+        .attr('placeholder', 'Search and add artist...')
         .style('width', '100%')
         .style('padding', '12px')
         .style('background', '#2A2A2A')
@@ -41,38 +51,130 @@ function createRadarChart() {
         .style('color', '#EDEDED')
         .style('border-radius', '8px')
         .style('font-size', '14px')
-        .on('change', function() {
-            const artist = this.value;
-            if (!artist) return;
-            
-            if (selectedArtistsForRadar.length >= 4) {
-                alert('Maximum 4 artists allowed');
-                this.value = '';
-                return;
-            }
-            
-            if (!selectedArtistsForRadar.includes(artist)) {
-                selectedArtistsForRadar.push(artist);
-                updateArtistChips();
-                updateRadarChart();
-            }
-            
-            this.value = '';
-        });
+        .style('transition', 'all 0.3s ease');
+    
+    // Dropdown de resultados
+    const resultsDropdown = searchContainer.append('div')
+        .attr('id', 'artist-search-results')
+        .style('position', 'absolute')
+        .style('top', '100%')
+        .style('left', '0')
+        .style('right', '0')
+        .style('max-height', '300px')
+        .style('overflow-y', 'auto')
+        .style('background', '#2A2A2A')
+        .style('border', '2px solid #1DB954')
+        .style('border-radius', '8px')
+        .style('margin-top', '4px')
+        .style('display', 'none')
+        .style('z-index', '1000')
+        .style('box-shadow', '0 4px 12px rgba(0, 0, 0, 0.5)');
     
     const topArtists = getTopArtists(appState.data, 200);
     
-    dropdown.append('option')
-        .attr('value', '')
-        .text('-- Select an artist --');
+    // Função para renderizar a lista de artistas
+    function renderArtistList(artists) {
+        resultsDropdown.selectAll('*').remove();
+        
+        artists.forEach(artist => {
+            const isSelected = selectedArtistsForRadar.includes(artist);
+            
+            const item = resultsDropdown.append('div')
+                .style('padding', '10px 12px')
+                .style('cursor', isSelected ? 'not-allowed' : 'pointer')
+                .style('transition', 'background 0.2s ease')
+                .style('color', isSelected ? '#666' : '#EDEDED')
+                .style('font-size', '14px')
+                .style('border-bottom', '1px solid #3A3A3A')
+                .text(artist)
+                .on('mouseover', function() {
+                    if (!isSelected) {
+                        d3.select(this).style('background', 'rgba(29, 185, 84, 0.2)');
+                    }
+                })
+                .on('mouseout', function() {
+                    d3.select(this).style('background', 'transparent');
+                })
+                .on('click', function() {
+                    if (isSelected) return;
+                    
+                    if (selectedArtistsForRadar.length >= 4) {
+                        alert('Maximum 4 artists allowed');
+                        return;
+                    }
+                    
+                    selectedArtistsForRadar.push(artist);
+                    searchInput.property('value', '');
+                    resultsDropdown.style('display', 'none');
+                    updateArtistChips();
+                    updateRadarChart();
+                });
+            
+            if (isSelected) {
+                item.append('span')
+                    .style('margin-left', '8px')
+                    .style('color', '#1DB954')
+                    .text('✓');
+            }
+        });
+        
+        resultsDropdown.style('display', 'block');
+    }
     
-    dropdown.selectAll('option.artist-option')
-        .data(topArtists)
-        .enter()
-        .append('option')
-        .attr('class', 'artist-option')
-        .attr('value', d => d)
-        .text(d => d);
+    // Função de pesquisa
+    searchInput.on('input', function() {
+        const query = this.value.toLowerCase().trim();
+        
+        if (query.length === 0) {
+            // Mostrar todos os artistas quando vazio
+            renderArtistList(topArtists.slice(0, 15));
+            return;
+        }
+        
+        const filtered = topArtists.filter(artist => 
+            artist.toLowerCase().includes(query)
+        ).slice(0, 15); // Limitar a 15 resultados
+        
+        if (filtered.length === 0) {
+            resultsDropdown.selectAll('*').remove();
+            resultsDropdown.append('div')
+                .style('padding', '10px 12px')
+                .style('color', '#666')
+                .style('font-size', '14px')
+                .style('text-align', 'center')
+                .text('No artists found');
+            resultsDropdown.style('display', 'block');
+            return;
+        }
+        
+        renderArtistList(filtered);
+    });
+    
+    // Fechar dropdown ao clicar fora
+    d3.select('body').on('click', function(event) {
+        if (!searchContainer.node().contains(event.target)) {
+            resultsDropdown.style('display', 'none');
+        }
+    });
+    
+    // Mostrar todos os artistas ao focar + border color
+    searchInput.on('focus', function() {
+        d3.select(this).style('border-color', '#1DB954');
+        const query = this.value.toLowerCase().trim();
+        
+        if (query.length === 0) {
+            renderArtistList(topArtists.slice(0, 15));
+        } else {
+            const filtered = topArtists.filter(artist => 
+                artist.toLowerCase().includes(query)
+            ).slice(0, 15);
+            renderArtistList(filtered);
+        }
+    }).on('blur', function() {
+        setTimeout(() => {
+            d3.select(this).style('border-color', '#3A3A3A');
+        }, 200);
+    });
     
     radarSvg = d3.select('#radar-chart')
         .append('svg')

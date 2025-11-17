@@ -195,8 +195,8 @@ input[type="range"]::-webkit-slider-thumb:hover {
     color: #1DB954;
 }
 
-/* ========== INPUT DE PESQUISA ========== */
-#artist-search {
+/* ========== INPUT DE PESQUISA (RADAR CHART) ========== */
+#artist-search-input {
     width: 100%;
     padding: 12px 16px;
     background: #2A2A2A;
@@ -207,14 +207,52 @@ input[type="range"]::-webkit-slider-thumb:hover {
     transition: all 0.3s ease;
 }
 
-#artist-search:focus {
+#artist-search-input:focus {
     outline: none;
     border-color: #1DB954;
     box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.2);
 }
 
-#artist-search::placeholder {
+#artist-search-input::placeholder {
     color: #666;
+}
+
+/* Dropdown de resultados da pesquisa */
+#artist-search-results {
+    background: #2A2A2A;
+    border: 2px solid #1DB954;
+    border-radius: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+#artist-search-results::-webkit-scrollbar {
+    width: 6px;
+}
+
+#artist-search-results::-webkit-scrollbar-track {
+    background: #1A1A1A;
+}
+
+#artist-search-results::-webkit-scrollbar-thumb {
+    background: #1DB954;
+    border-radius: 3px;
+}
+
+#artist-search-results div {
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    border-bottom: 1px solid #3A3A3A;
+}
+
+#artist-search-results div:last-child {
+    border-bottom: none;
+}
+
+#artist-search-results div:hover {
+    background: rgba(29, 185, 84, 0.2);
 }
 
 /* ========== BOTÃO RESET ========== */
@@ -332,10 +370,17 @@ header p {
     flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 12px;
+    min-height: 0;
+    padding: 0;
+    background: transparent;
+    border-radius: 8px;
+}
+
+/* Quando tiver chips, mostrar o background */
+.selected-artists-chips:has(.artist-chip) {
     min-height: 40px;
     padding: 8px;
     background: rgba(42, 42, 42, 0.3);
-    border-radius: 8px;
 }
 
 .artist-chip {
@@ -380,33 +425,6 @@ header p {
 
 .artist-chip button:hover {
     background: rgba(0, 0, 0, 0.2);
-}
-
-/* Dropdown customizado */
-#artist-dropdown {
-    width: 100%;
-    max-height: 200px;
-    background: #2A2A2A;
-    border: 2px solid #3A3A3A;
-    color: #EDEDED;
-    padding: 8px;
-    border-radius: 8px;
-    font-size: 14px;
-    overflow-y: auto;
-}
-
-#artist-dropdown:focus {
-    outline: none;
-    border-color: #1DB954;
-}
-
-#artist-dropdown option {
-    padding: 8px;
-    border-radius: 4px;
-}
-
-#artist-dropdown option:hover {
-    background: rgba(29, 185, 84, 0.2);
 }
 
 /* ========== TOOLTIP ========== */
