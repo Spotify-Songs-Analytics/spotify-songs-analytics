@@ -57,14 +57,37 @@
                 <div id="timeline"></div>
             </section>
             
-            <!-- Card 3: Radar Chart -->
+            <!-- Card 3: Variables Throughout Time -->
+            <section class="visualization-card">
+                <h2>Variables Throughout API</h2>
+                <div id="variables-timeline"></div>
+            </section>
+            
+            <!-- Card 4: Popularity vs Number of Songs -->
+            <section class="visualization-card">
+                <h2>Popularity vs Number of Songs</h2>
+                <div id="popularity-scatter"></div>
+                <div id="popularity-tooltip" class="tooltip"></div>
+            </section>
+            
+            <!-- Card 5: Radar Chart -->
             <section class="visualization-card">
                 <h2>Artist Profile Comparison</h2>
                 <div id="artist-select">
                     <!-- Será preenchido dinamicamente -->
                 </div>
                 <div id="radar-chart"></div>
-            </section> 
+            </section>
+            
+            <!-- Card 6: Artist Songs Analysis -->
+            <section class="visualization-card">
+                <h2>Artist Songs Analysis</h2>
+                <div id="artist-songs-container">
+                    <p style="color: #B3B3B3; text-align: center; padding: 20px;">
+                        Select an artist from the radar chart above to see their songs
+                    </p>
+                </div>
+            </section>
         </main>
         
 
@@ -76,6 +99,9 @@
     <script src="js/filters.js"></script>
     <script src="js/scatterplot.js"></script>
     <script src="js/timeline.js"></script>
+    <script src="js/variables-timeline.js"></script>
+    <script src="js/popularity-scatter.js"></script>
+    <script src="js/artist-songs.js"></script>
     <script src="js/radar.js"></script>
     <script src="js/main.js"></script>
 </body>

@@ -529,3 +529,67 @@ circle:hover {
 ::-webkit-scrollbar-thumb:hover {
     background: #1DB954;
 }
+
+/* ========== ARTIST SONGS CONTAINER ========== */
+#artist-songs-container {
+    min-height: 200px;
+}
+
+/* Grid responsivo para cards de músicas */
+@media (max-width: 1200px) {
+    #artist-songs-container > div {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ========== VARIABLES TIMELINE ========== */
+#variables-timeline {
+    width: 100%;
+    overflow: visible;
+}
+
+#variables-timeline svg {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.variable-line {
+    transition: all 0.3s ease;
+}
+
+.variable-line:hover {
+    stroke-width: 4 !important;
+    opacity: 1 !important;
+}
+
+/* ========== POPULARITY SCATTER ========== */
+#popularity-scatter {
+    overflow-x: auto;
+}
+
+#popularity-scatter svg {
+    min-width: 700px;
+}
+
+/* ========== GRID LAYOUT RESPONSIVO ========== */
+@media (max-width: 1400px) {
+    .visualization-card {
+        padding: 20px;
+    }
+    
+    .visualization-card h2 {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .visualization-card {
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+    
+    .visualization-card h2 {
+        font-size: 18px;
+    }
+}

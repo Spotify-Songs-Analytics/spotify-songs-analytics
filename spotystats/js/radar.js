@@ -108,6 +108,11 @@ function createRadarChart() {
                     resultsDropdown.style('display', 'none');
                     updateArtistChips();
                     updateRadarChart();
+                    
+                    // Mostrar músicas do primeiro artista selecionado
+                    if (typeof createArtistSongsView === 'function') {
+                        createArtistSongsView(artist);
+                    }
                 });
             
             if (isSelected) {

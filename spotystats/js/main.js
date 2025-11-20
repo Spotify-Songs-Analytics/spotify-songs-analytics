@@ -211,7 +211,10 @@ async function loadData() {
         initializeFilters();
         createScatterplot();
         createTimeline();
+        createVariablesTimeline();
+        createPopularityScatter();
         createRadarChart();
+        createArtistSongsView(null);
         
     } catch (error) {
         console.error('Error loading data:', error);
@@ -232,6 +235,9 @@ function updateAllVisualizations() {
     
     updateScatterplot();
     updateTimeline();
+    updateVariablesTimeline();
+    updatePopularityScatter();
+    updateArtistSongsView();
 }
 
 loadData();
