@@ -107,7 +107,7 @@ function createArtistSongsView(artistName) {
             .style('border-radius', '12px')
             .style('font-size', '13px')
             .style('font-weight', '600')
-            .text(`${song.popularity}%`);
+            .text(`${song.popularity}% popular`);
         
         // Métricas com barras
         const metrics = [

@@ -3,9 +3,9 @@ let selectedArtistsForRadar = [];
 
 function createRadarChart() {
     const margin = {top: 50, right: 100, bottom: 50, left: 100};
-    const width = 500;
-    const height = 500;
-    const radius = Math.min(width, height) / 2 - 50;
+    const width = 710;
+    const height = 700;
+    const radius = Math.min(width, height) / 2 - 110;
     
     d3.select('#radar-chart').selectAll('*').remove();
     d3.select('#artist-select').selectAll('*').remove();
@@ -132,13 +132,13 @@ function createRadarChart() {
         
         if (query.length === 0) {
             // Mostrar todos os artistas quando vazio
-            renderArtistList(topArtists.slice(0, 15));
+            renderArtistList(topArtists);
             return;
         }
         
         const filtered = topArtists.filter(artist => 
             artist.toLowerCase().includes(query)
-        ).slice(0, 15); // Limitar a 15 resultados
+        );
         
         if (filtered.length === 0) {
             resultsDropdown.selectAll('*').remove();
@@ -168,11 +168,11 @@ function createRadarChart() {
         const query = this.value.toLowerCase().trim();
         
         if (query.length === 0) {
-            renderArtistList(topArtists.slice(0, 15));
+            renderArtistList(topArtists);
         } else {
             const filtered = topArtists.filter(artist => 
                 artist.toLowerCase().includes(query)
-            ).slice(0, 15);
+            );
             renderArtistList(filtered);
         }
     }).on('blur', function() {
@@ -224,12 +224,13 @@ function createRadarChart() {
             .attr('stroke-width', 2);
         
         radarSvg.append('text')
-            .attr('x', x * 1.15)
-            .attr('y', y * 1.15)
-            .attr('text-anchor', 'middle')
+            .attr('x', x * 1.3)
+            .attr('y', y * 1.3)
+            .attr('text-anchor', getTextAnchor(i, axes.length))
             .attr('fill', '#EDEDED')
-            .style('font-size', '13px')
+            .style('font-size', '12px')
             .style('font-weight', 'bold')
+            .style('max-width', '80px')
             .text(axis.name);
     });
     
@@ -240,6 +241,15 @@ function createRadarChart() {
         .attr('fill', '#B3B3B3')
         .style('font-size', '14px')
         .text('Select artists above to compare');
+}
+
+function getTextAnchor(index, total) {
+    const angle = (Math.PI * 2 / total) * index - Math.PI / 2;
+    const degrees = (angle * 180 / Math.PI + 360) % 360;
+    
+    if (degrees > 45 && degrees < 135) return 'start';  // Direita
+    if (degrees > 225 && degrees < 315) return 'end';   // Esquerda
+    return 'middle'; // Topo/fundo
 }
 
 function updateArtistChips() {
