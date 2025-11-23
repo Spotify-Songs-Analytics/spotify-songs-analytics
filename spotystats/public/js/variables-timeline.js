@@ -296,26 +296,27 @@ function createVariablesTimeline() {
                     .style('text-decoration', isVisible ? 'none' : 'line-through');
             })
             .on('mouseover', function() {
-                if (visibleVariables.has(variable.key)) {
-                    d3.select(`.line-${i}`)
-                        .attr('stroke-width', 6)
-                        .style('opacity', 1);
-                    
-                    d3.selectAll('.variable-line').style('opacity', 0.2);
-                    d3.selectAll('.variable-area').style('opacity', 0.1);
-                    
-                    d3.select(`.line-${i}`).style('opacity', 1);
-                    d3.select(`.variable-area-${variable.key}`).style('opacity', 1);
-                    
-                    variablesTimelineSvg.selectAll(`.point-${i}`)
-                        .style('opacity', 1);
-                    
-                    d3.select(this).select('line')
-                        .attr('stroke-width', 5);
-                    
-                    d3.select(this).select('text')
-                        .style('font-weight', 'bold');
-                }
+                if (!visibleVariables.has(variable.key)) return;
+                
+                d3.selectAll('.variable-line').style('opacity', 0.2);
+                d3.selectAll('.variable-area').style('opacity', 0.1);
+                
+                d3.select(`.line-${i}`)
+                    .raise()
+                    .style('opacity', 1)
+                    .attr('stroke-width', 6);
+                
+                d3.select(`.variable-area-${variable.key}`)
+                    .style('opacity', 1);
+                
+                variablesTimelineSvg.selectAll(`.point-${i}`)
+                    .style('opacity', 1);
+                
+                d3.select(this).select('line')
+                    .attr('stroke-width', 5);
+                
+                d3.select(this).select('text')
+                    .style('font-weight', 'bold');
             })
             .on('mouseout', function() {
                 d3.selectAll('.variable-line').each(function() {
@@ -328,7 +329,13 @@ function createVariablesTimeline() {
                     }
                 });
                 
-                d3.selectAll('.variable-area').style('opacity', 1);
+                d3.selectAll('.variable-area').each(function() {
+                    const className = d3.select(this).attr('class');
+                    const match = className.match(/variable-area-(\w+)/);
+                    if (match && visibleVariables.has(match[1])) {
+                        d3.select(this).style('opacity', 1);
+                    }
+                });
                 
                 variablesTimelineSvg.selectAll(`.point-${i}`)
                     .style('opacity', 0);
@@ -338,10 +345,7 @@ function createVariablesTimeline() {
                 
                 d3.select(this).select('text')
                     .style('font-weight', '500');
-                
-                d3.selectAll('.var-tooltip').remove();
             });
-
         
         legendRow.append('line')
             .attr('x1', 0)
