@@ -234,19 +234,22 @@ function createVariablesTimeline() {
     variablesTimelineSvg.append('text')
         .attr('x', width / 2)
         .attr('y', height + 40)
-        .attr('fill', '#B3B3B3')
+        .attr('fill', '#EDEDED')
         .attr('text-anchor', 'middle')
-        .style('font-size', '14px')
+        .style('font-size', '16px')
+        .style('font-weight', '600')
         .text('Year');
 
     variablesTimelineSvg.append('text')
         .attr('transform', 'rotate(-90)')
         .attr('x', -height / 2)
         .attr('y', -45)
-        .attr('fill', '#B3B3B3')
+        .attr('fill', '#EDEDED')
         .attr('text-anchor', 'middle')
-        .style('font-size', '14px')
+        .style('font-size', '16px')
+        .style('font-weight', '600')
         .text('Average Value (%)');
+
 
     // Legenda
     const legend = variablesTimelineSvg.append('g')
