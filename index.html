@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" crossorigin href="/spotify-songs-analytics/assets/index-Jyo3ZPOU.css">
+  <link rel="stylesheet" crossorigin href="/spotify-songs-analytics/assets/index-9zLOHvHq.css">
 </head>
 
 <body>
@@ -23,7 +23,7 @@
             <ul class="nav-links">
                 <li><a href="#" data-page="energy-danceability" class="active">Energy vs Danceability</a></li>
                 <li><a href="#" data-page="evolution">Evolution Over Time</a></li>
-                <li><a href="#" data-page="popularity">Popularity Analysis</a></li>
+
                 <li><a href="#" data-page="artist-comparison">Artist Comparison</a></li>
                 <li><a href="#" data-page="artists">Artist Deep Dive</a></li>
             </ul>
@@ -46,7 +46,6 @@
                     <input type="range" id="popularity-slider" min="0" max="100" value="0">
                     <span id="popularity-value">0+</span>
                 </div>
-
                 <button id="reset-filters" class="btn-secondary">Reset Filters</button>
             </div>
         </nav>
@@ -78,13 +77,7 @@
                     </div>
                 </section>
 
-                <!-- Page 3: Popularity vs Number of Songs -->
-                <section id="page-popularity" class="page-section">
-                    <div class="visualization-card full-height">
-                        <h3>Popularity vs Number of Songs</h3>
-                        <div id="popularity-scatter"></div>
-                    </div>
-                </section>
+
 
                 <!-- Page 4: Artist Profile Comparison -->
                 <section id="page-artist-comparison" class="page-section">
@@ -137,7 +130,7 @@
     <script src="js/scatterplot.js"></script>
     <script src="js/timeline.js"></script>
     <script src="js/variables-timeline.js"></script>
-    <script src="js/popularity-scatter.js"></script>
+
     <script src="js/artist-songs.js"></script>
     <script src="js/radar.js"></script>
     <script src="js/main.js"></script>

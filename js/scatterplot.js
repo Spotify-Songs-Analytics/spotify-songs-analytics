@@ -34,9 +34,11 @@ function createScatterplot() {
     const minPop = d3.min(appState.data, d => d.popularity) || 0;
     const maxPop = d3.max(appState.data, d => d.popularity) || 100;
 
-    scatterRadiusScale = d3.scaleLinear()
+    scatterRadiusScale = d3.scalePow()
+        .exponent(7)
         .domain([minPop, maxPop])
-        .range([3, 12]); // Min radius 3px, Max radius 12px
+        .range([3, 12]);
+
 
     // Eixos
     scatterSvg.append('g')

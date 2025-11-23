@@ -25,14 +25,7 @@ class Router {
                     if (typeof createVariablesTimeline === 'function') createVariablesTimeline();
                 }
             },
-            'popularity': {
-                title: 'Popularity Analysis',
-                subtitle: 'Analyzing the relationship between song popularity and the number of songs.',
-                showFilters: true,
-                init: () => {
-                    if (typeof updatePopularityScatter === 'function') updatePopularityScatter();
-                }
-            },
+
             'artist-comparison': {
                 title: 'Artist Comparison',
                 subtitle: 'Compare the musical profiles of different artists.',
@@ -44,7 +37,7 @@ class Router {
             'artists': {
                 title: 'Artist Deep Dive',
                 subtitle: 'Explore individual artist discographies and preview their top tracks.',
-                showFilters: true,
+                showFilters: false,
                 init: () => {
                     if (typeof initArtistsPage === 'function') initArtistsPage();
                 }

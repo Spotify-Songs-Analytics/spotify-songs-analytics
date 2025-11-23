@@ -237,7 +237,6 @@ async function loadData() {
         createScatterplot();
         createTimeline();
         createVariablesTimeline();
-        createPopularityScatter();
         createRadarChart();
         createArtistSongsView(null);
 

@@ -40,11 +40,17 @@ function initializeFilters() {
     });
 
     // Slider de popularidade
-    d3.select('#popularity-slider').on('input', function () {
-        appState.minPopularity = +this.value;
-        d3.select('#popularity-value').text(this.value + '+');
-        updateAllVisualizations();
-    });
+    // Popularity slider (if present)
+    const popSlider = d3.select('#popularity-slider');
+    if (!popSlider.empty()) {
+        popSlider.on('input', function () {
+            appState.minPopularity = +this.value;
+            d3.select('#popularity-value').text(this.value + '+');
+            updateAllVisualizations();
+        });
+    }
+
+
 
     // Adicionar filtro de ano
     const yearFilterHTML = `
@@ -76,8 +82,12 @@ function initializeFilters() {
         appState.minPopularity = 0;
         appState.yearRange = [2000, 2023];
         d3.selectAll('.genre-checkbox input').property('checked', false);
-        d3.select('#popularity-slider').property('value', 0);
-        d3.select('#popularity-value').text('0+');
+        // Reset popularity slider if it exists
+        const popSlider = d3.select('#popularity-slider');
+        if (!popSlider.empty()) {
+            popSlider.property('value', 0);
+            d3.select('#popularity-value').text('0+');
+        }
         d3.select('#year-min').property('value', 2000);
         d3.select('#year-max').property('value', 2023);
         d3.select('#year-range-display').text('2000 - 2023');
