@@ -1,161 +1,283 @@
 let selectedArtistForSongs = null;
 
-function createArtistSongsView(artistName) {
-    selectedArtistForSongs = artistName;
-    
-    const container = d3.select('#artist-songs-container');
-    container.selectAll('*').remove();
-    
-    if (!artistName) {
-        container.append('p')
-            .style('color', '#B3B3B3')
-            .style('text-align', 'center')
-            .style('padding', '20px')
-            .text('Select an artist from the radar chart above to see their songs');
-        return;
+// Initialize the Artists Page
+// Initialize the Artists Page
+function initArtistsPage() {
+    createArtistSongsView(null);
+}
+
+function showArtistDetail(artistName) {
+    // ... (This function seems redundant now as showArtistDetails handles it, but let's keep it compatible if needed or just redirect)
+    showArtistDetails(artistName);
+}
+
+function hideArtistDetail() {
+    selectedArtistForSongs = null; // Clear selection
+    createArtistSongsView(null);
+}
+
+// Initialize the artist songs view (this function now handles the artist list and search)
+function createArtistSongsView(selectedArtist) {
+    // Ensure the correct container is visible
+    d3.select('.artist-selection-view').classed('hidden', false);
+    d3.select('#artist-detail-view').classed('hidden', true);
+
+    const container = d3.select('#artist-songs-container'); // Use the existing container for the list
+    container.html(''); // Clear previous content
+
+    // --- Search Bar Section ---
+    const searchContainer = container.append('div')
+        .attr('class', 'artist-search-container')
+        .style('margin-bottom', '24px')
+        .style('display', 'flex')
+        .style('gap', '12px');
+
+    const searchInput = searchContainer.append('input')
+        .attr('type', 'text')
+        .attr('placeholder', 'Search for an artist...')
+        .attr('class', 'artist-search-input')
+        .style('padding', '12px')
+        .style('border-radius', '24px')
+        .style('border', '1px solid #404040')
+        .style('background', '#282828')
+        .style('color', '#fff')
+        .style('flex-grow', '1')
+        .style('font-size', '16px');
+
+    // --- Artist List Container ---
+    const artistsListContainer = container.append('div')
+        .attr('class', 'artists-list-grid');
+
+    // Get all unique artists sorted alphabetically from FILTERED data
+    const allArtists = Array.from(new Set(appState.filteredData.map(d => d.artist))).sort();
+
+    // Function to render artist cards
+    function renderArtistCards(filterText = '') {
+        artistsListContainer.html(''); // Clear list
+
+        const filteredArtists = allArtists.filter(artist =>
+            artist.toLowerCase().includes(filterText.toLowerCase())
+        );
+
+        if (filteredArtists.length === 0) {
+            artistsListContainer.append('p')
+                .style('color', '#b3b3b3')
+                .style('grid-column', '1 / -1')
+                .style('text-align', 'center')
+                .text('No artists found matching your search (or filters).');
+            return;
+        }
+
+        filteredArtists.forEach(artist => {
+            const card = artistsListContainer.append('div')
+                .attr('class', 'artist-card')
+                .on('click', () => showArtistDetails(artist));
+
+            // Placeholder image (since we don't have real artist images)
+            // We can use a colored circle with initials
+            const initials = artist.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+            card.append('div')
+                .style('width', '80px')
+                .style('height', '80px')
+                .style('border-radius', '50%')
+                .style('background', '#333')
+                .style('color', '#1DB954')
+                .style('display', 'flex')
+                .style('align-items', 'center')
+                .style('justify-content', 'center')
+                .style('font-size', '24px')
+                .style('font-weight', 'bold')
+                .style('margin', '0 auto 16px')
+                .text(initials);
+
+            card.append('h4')
+                .text(artist);
+
+            // Count songs for this artist in FILTERED data
+            const songCount = appState.filteredData.filter(d => d.artist === artist).length;
+
+            card.append('p')
+                .text(`${songCount} songs`);
+        });
     }
-    
-    // Filtrar músicas do artista
-    const artistSongs = appState.data
-        .filter(d => d.artist === artistName)
-        .sort((a, b) => b.popularity - a.popularity)
-        .slice(0, 20); // Top 20 músicas
-    
-    if (artistSongs.length === 0) {
-        container.append('p')
-            .style('color', '#B3B3B3')
-            .style('text-align', 'center')
-            .style('padding', '20px')
-            .text(`No songs found for ${artistName}`);
-        return;
+
+    // Initial render
+    renderArtistCards();
+
+    // Search input event listener
+    searchInput.on('input', function () {
+        renderArtistCards(this.value);
+    });
+
+    // If an artist is selected (from another page), show details immediately
+    if (selectedArtist) {
+        showArtistDetails(selectedArtist);
     }
-    
-    // Header
-    const header = container.append('div')
+}
+
+function showArtistDetails(artist) {
+    selectedArtistForSongs = artist; // Update global selected artist
+
+    // Hide the artist selection view and show the detail view
+    d3.select('.artist-selection-view').classed('hidden', true);
+    d3.select('#artist-detail-view').classed('hidden', false);
+
+    const container = d3.select('#artist-detail-view-content'); // Use the content div within the detail view
+    container.html(''); // Clear list view
+
+    // Back button
+    const backBtn = container.append('button')
+        .attr('class', 'btn-secondary')
         .style('margin-bottom', '20px')
-        .style('padding', '15px')
-        .style('background', 'rgba(29, 185, 84, 0.1)')
-        .style('border-radius', '8px')
-        .style('border-left', '4px solid #1DB954');
-    
-    header.append('h3')
-        .style('color', '#1DB954')
-        .style('margin', '0 0 8px 0')
-        .style('font-size', '20px')
-        .text(artistName);
-    
-    header.append('p')
-        .style('color', '#B3B3B3')
-        .style('margin', '0')
-        .style('font-size', '14px')
-        .text(`${artistSongs.length} songs • Sorted by popularity`);
-    
-    // Container de músicas
-    const songsContainer = container.append('div')
-        .style('display', 'grid')
-        .style('grid-template-columns', 'repeat(auto-fit, minmax(400px, 1fr))')
-        .style('gap', '16px')
-        .style('margin-top', '20px');
-    
-    // Criar card para cada música
-    artistSongs.forEach((song, index) => {
-        const songCard = songsContainer.append('div')
-            .style('background', 'rgba(42, 42, 42, 0.5)')
-            .style('border', '1px solid #3A3A3A')
-            .style('border-radius', '8px')
-            .style('padding', '16px')
-            .style('transition', 'all 0.3s ease')
-            .on('mouseover', function() {
-                d3.select(this)
-                    .style('border-color', '#1DB954')
-                    .style('transform', 'translateY(-2px)')
-                    .style('box-shadow', '0 4px 12px rgba(29, 185, 84, 0.2)');
-            })
-            .on('mouseout', function() {
-                d3.select(this)
-                    .style('border-color', '#3A3A3A')
-                    .style('transform', 'translateY(0)')
-                    .style('box-shadow', 'none');
+        .html('← Back to Artists')
+        .on('click', () => hideArtistDetail()); // Call hideArtistDetail to go back to the list
+
+    // Header
+    container.append('h2')
+        .attr('id', 'selected-artist-name') // Keep the ID for consistency if other parts of the app use it
+        .style('margin-bottom', '10px')
+        .text(artist);
+
+    // Layout Grid
+    const contentGrid = container.append('div')
+        .attr('class', 'artist-content-grid');
+
+    // Left: Song List
+    const songList = contentGrid.append('div')
+        .attr('class', 'song-list');
+
+    // Right: Spotify Preview
+    const spotifyPreview = contentGrid.append('div')
+        .attr('class', 'spotify-preview');
+
+    spotifyPreview.append('h3').text('Preview');
+    spotifyPreview.append('div')
+        .attr('id', 'spotify-iframe-container')
+        .html('<p class="placeholder-text">Select a song to preview</p>');
+
+    // Get artist songs from FILTERED data
+    const songs = appState.filteredData
+        .filter(d => d.artist === artist)
+        .sort((a, b) => b.popularity - a.popularity);
+
+    songs.forEach(song => {
+        const item = songList.append('div')
+            .attr('class', 'song-item')
+            .on('click', function () {
+                // Highlight active song
+                d3.selectAll('.song-item').classed('active', false);
+                d3.select(this).classed('active', true);
+                updateSpotifyIframe(song);
             });
-        
-        // Header da música
-        const songHeader = songCard.append('div')
+
+        const info = item.append('div').attr('class', 'song-info');
+        info.append('div').attr('class', 'song-title').text(song.name);
+        info.append('div').attr('class', 'song-meta')
+            .text(`${song.year} • Popularity: ${song.popularity}`);
+
+        // Enhanced Metrics Visualization
+        const metricsRow = item.append('div')
             .style('display', 'flex')
-            .style('justify-content', 'space-between')
-            .style('align-items', 'flex-start')
-            .style('margin-bottom', '12px');
-        
-        const songInfo = songHeader.append('div')
-            .style('flex', '1');
-        
-        songInfo.append('div')
-            .style('color', '#EDEDED')
-            .style('font-size', '16px')
-            .style('font-weight', '600')
-            .style('margin-bottom', '4px')
-            .text(song.name.length > 35 ? song.name.substring(0, 35) + '...' : song.name);
-        
-        songInfo.append('div')
-            .style('color', '#B3B3B3')
-            .style('font-size', '12px')
-            .text(`${song.year} • ${song.genre}`);
-        
-        songHeader.append('div')
-            .style('background', 'rgba(29, 185, 84, 0.2)')
-            .style('color', '#1DB954')
-            .style('padding', '4px 10px')
-            .style('border-radius', '12px')
-            .style('font-size', '13px')
-            .style('font-weight', '600')
-            .text(`${song.popularity}% popular`);
-        
-        // Métricas com barras
+            .style('gap', '12px')
+            .style('margin-top', '8px');
+
         const metrics = [
-            {name: 'Energy', value: song.energy, color: '#00FF00'},
-            {name: 'Danceability', value: song.danceability, color: '#00CED1'},
-            {name: 'Valence', value: song.valence, color: '#FF4500'},
-            {name: 'Acousticness', value: song.acousticness, color: '#FF69B4'}
+            { key: 'energy', label: 'Energy', color: '#FFD700' },       // Gold
+            { key: 'danceability', label: 'Dance', color: '#FF69B4' },  // Hot Pink
+            { key: 'valence', label: 'Mood', color: '#00CED1' },        // Dark Turquoise
+            { key: 'acousticness', label: 'Acoustic', color: '#32CD32' } // Lime Green
         ];
-        
-        const metricsContainer = songCard.append('div')
-            .style('margin-top', '12px');
-        
-        metrics.forEach(metric => {
-            const metricRow = metricsContainer.append('div')
-                .style('margin-bottom', '8px');
-            
-            metricRow.append('div')
+
+        metrics.forEach(m => {
+            const mContainer = metricsRow.append('div')
+                .style('flex', '1')
+                .style('display', 'flex')
+                .style('flex-direction', 'column')
+                .style('gap', '2px');
+
+            // Label and Value
+            const header = mContainer.append('div')
                 .style('display', 'flex')
                 .style('justify-content', 'space-between')
-                .style('margin-bottom', '4px')
-                .html(`
-                    <span style="color: #B3B3B3; font-size: 12px;">${metric.name}</span>
-                    <span style="color: #EDEDED; font-size: 12px; font-weight: 600;">${(metric.value * 100).toFixed(0)}%</span>
-                `);
-            
-            const barContainer = metricRow.append('div')
-                .style('width', '100%')
+                .style('font-size', '10px')
+                .style('color', '#b3b3b3');
+
+            header.append('span').text(m.label);
+            header.append('span').text(`${(song[m.key] * 100).toFixed(0)}%`);
+
+            // Bar Background
+            const barBg = mContainer.append('div')
                 .style('height', '6px')
-                .style('background', 'rgba(255, 255, 255, 0.1)')
+                .style('background', '#404040')
                 .style('border-radius', '3px')
                 .style('overflow', 'hidden');
-            
-            barContainer.append('div')
-                .style('width', '0%')
+
+            // Bar Fill
+            barBg.append('div')
                 .style('height', '100%')
-                .style('background', metric.color)
-                .style('border-radius', '3px')
-                .style('transition', 'width 0.5s ease')
-                .transition()
-                .duration(800)
-                .delay(index * 50)
-                .style('width', (metric.value * 100) + '%');
+                .style('width', `${song[m.key] * 100}%`)
+                .style('background-color', m.color);
         });
     });
 }
 
-function updateArtistSongsView() {
-    if (selectedArtistForSongs) {
-        createArtistSongsView(selectedArtistForSongs);
+function getMetricColor(metric) {
+    switch (metric) {
+        case 'energy': return '#FFC107'; // Yellow
+        case 'danceability': return '#00BCD4'; // Cyan
+        case 'valence': return '#E91E63'; // Pink
+        default: return '#1DB954';
     }
 }
+
+function updateSpotifyIframe(song) {
+    const container = d3.select('#spotify-iframe-container');
+    container.html('');
+
+    // Check if we have a real Spotify Track ID (loaded from matched_tracks.csv)
+    if (song.hasRealId && song.id != "NOT_FOUND") {
+        container.append('iframe')
+            .attr('style', 'border-radius:12px')
+            .attr('src', `https://open.spotify.com/embed/track/${song.id}?utm_source=generator`)
+            .attr('width', '100%')
+            .attr('height', '2000')
+            .attr('frameBorder', '0')
+            .attr('allowfullscreen', '')
+            .attr('allow', 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture')
+            .attr('loading', 'lazy');
+    } else {
+        // Fallback: Search on Spotify
+        container.append('div')
+            .style('padding', '30px')
+            .style('text-align', 'center')
+            .style('color', '#B3B3B3')
+            .style('display', 'flex')
+            .style('flex-direction', 'column')
+            .style('align-items', 'center')
+            .style('gap', '16px')
+            .html(`
+                <div style="font-size: 48px; margin-bottom: 8px;">🎵</div>
+                <p style="margin: 0; font-size: 16px; color: #EDEDED;">${song.name}</p>
+                <p style="margin: 0; font-size: 14px;">${song.artist}</p>
+                <p style="margin: 0; font-size: 12px; color: #888;">(Preview unavailable for this track)</p>
+                <a href="https://open.spotify.com/search/${encodeURIComponent(song.name + ' ' + song.artist)}" 
+                   target="_blank" 
+                   class="btn-secondary"
+                   style="display: inline-block; margin-top: 8px; text-decoration: none; border-color: #1DB954; color: #1DB954;">
+                   Listen on Spotify ↗
+                </a>
+            `);
+    }
+}
+
+// Export functions to be used globally
+window.initArtistsPage = initArtistsPage;
+window.updateArtistSongsView = () => {
+    // Re-render if in detail view
+    if (selectedArtistForSongs) {
+        createArtistSongsView(selectedArtistForSongs);
+    } else {
+        initArtistsPage();
+    }
+};
