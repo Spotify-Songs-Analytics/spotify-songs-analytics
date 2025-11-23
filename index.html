@@ -1,98 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spotify Music Analytics</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-  <link rel="stylesheet" crossorigin href="/spotify-songs-analytics/assets/index-BwC7TPZq.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" crossorigin href="/spotify-songs-analytics/assets/index-Jyo3ZPOU.css">
 </head>
-<script>
-    // Debug: ver se os dados carregam
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-        }, 2000);
-    });
-</script>
 
 <body>
-    <div class="container">
-        <!-- Sidebar com filtros -->
-        <aside class="sidebar">
-            <h2>Filters</h2>
-            
-            <!-- Filtro por género -->
-            <div class="filter-group">
-                <h3>Genre</h3>
-                <div id="genre-filters"></div>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>SpotyStats</h2>
             </div>
-            
-            <!-- Filtro por popularidade -->
-            <div class="filter-group">
-                <h3>Popularity</h3>
-                <input type="range" id="popularity-slider" min="0" max="100" value="0">
-                <span id="popularity-value">0+</span>
+            <ul class="nav-links">
+                <li><a href="#" data-page="energy-danceability" class="active">Energy vs Danceability</a></li>
+                <li><a href="#" data-page="evolution">Evolution Over Time</a></li>
+                <li><a href="#" data-page="popularity">Popularity Analysis</a></li>
+                <li><a href="#" data-page="artist-comparison">Artist Comparison</a></li>
+                <li><a href="#" data-page="artists">Artist Deep Dive</a></li>
+            </ul>
+
+            <!-- Filters Section (Moved here, visibility toggled by JS) -->
+            <div id="sidebar-filters" class="sidebar-filters">
+                <h3>Filters</h3>
+                <!-- Filter by Genre -->
+                <div class="filter-group">
+                    <h4 class="filter-accordion-header collapsed" id="genre-accordion-header">
+                        Genre
+                        <span class="accordion-icon">▼</span>
+                    </h4>
+                    <div id="genre-filters" class="filter-accordion-content collapsed"></div>
+                </div>
+
+                <!-- Filter by Popularity -->
+                <div class="filter-group filter-popularity">
+                    <h4>Popularity</h4>
+                    <input type="range" id="popularity-slider" min="0" max="100" value="0">
+                    <span id="popularity-value">0+</span>
+                </div>
+
+                <button id="reset-filters" class="btn-secondary">Reset Filters</button>
             </div>
-            
-            <button id="reset-filters">Reset Filters</button>
-        </aside>
-        
-        <!-- Área principal com as 3 visualizações -->
+        </nav>
+
+        <!-- Main Content Area -->
         <main class="main-content">
-            <header>
-                <h1>Spotify Music Analytics</h1>
-                <p>Exploring 99 years of musical evolution (1921–2020)</p>
+            <header class="top-bar">
+                <h1 id="page-title">Energy vs. Danceability</h1>
+                <p id="page-subtitle">Exploring the relationship between energy and danceability across genres.</p>
             </header>
-            
-            <!-- Card 1: Scatterplot -->
-            <section class="visualization-card">
-                <h2>Energy vs. Danceability by Genre</h2>
-                <div id="scatterplot"></div>
-                <div id="scatter-tooltip" class="tooltip"></div>
-            </section>
-            
-            <!-- Card 2: Timeline -->
-            <section class="visualization-card">
-                <h2>Genre Evolution Over Time</h2>
-                <div id="timeline"></div>
-            </section>
-            
-            <!-- Card 3: Variables Throughout Time -->
-            <section class="visualization-card">
-                <h2>Music Variables Evolution Over Time</h2>
-                <div id="variables-timeline"></div>
-            </section>
-            
-            <!-- Card 4: Popularity vs Number of Songs -->
-            <section class="visualization-card">
-                <h2>Popularity vs Number of Songs</h2>
-                <div id="popularity-scatter"></div>
-                <div id="popularity-tooltip" class="tooltip"></div>
-            </section>
-            
-            <!-- Card 5: Radar Chart -->
-            <section class="visualization-card">
-                <h2>Artist Profile Comparison</h2>
-                <div id="artist-select">
-                    <!-- Será preenchido dinamicamente -->
-                </div>
-                <div id="radar-chart"></div>
-            </section>
-            
-            <!-- Card 6: Artist Songs Analysis -->
-            <section class="visualization-card">
-                <h2>Artist Songs Analysis</h2>
-                <div id="artist-songs-container">
-                    <p style="color: #B3B3B3; text-align: center; padding: 20px;">
-                        Select an artist from the radar chart above to see their songs
-                    </p>
-                </div>
-            </section>
+
+            <div class="content-area">
+                <!-- Page 1: Energy vs Danceability -->
+                <section id="page-energy-danceability" class="page-section active">
+                    <div class="visualization-card full-height">
+                        <div id="scatterplot"></div>
+                    </div>
+                </section>
+
+                <!-- Page 2: Evolution Over Time -->
+                <section id="page-evolution" class="page-section">
+                    <div class="visualization-card">
+                        <h3>Genre Evolution Over Time</h3>
+                        <div id="timeline"></div>
+                    </div>
+                    <div class="visualization-card">
+                        <h3>Music Variables Evolution Over Time</h3>
+                        <div id="variables-timeline"></div>
+                    </div>
+                </section>
+
+                <!-- Page 3: Popularity vs Number of Songs -->
+                <section id="page-popularity" class="page-section">
+                    <div class="visualization-card full-height">
+                        <h3>Popularity vs Number of Songs</h3>
+                        <div id="popularity-scatter"></div>
+                    </div>
+                </section>
+
+                <!-- Page 4: Artist Profile Comparison -->
+                <section id="page-artist-comparison" class="page-section">
+                    <div class="visualization-card full-height">
+                        <h3>Artist Profile Comparison</h3>
+                        <div id="artist-select-container">
+                            <div id="artist-select">
+                                <!-- Will be filled dynamically -->
+                            </div>
+                        </div>
+                        <div id="radar-chart"></div>
+                    </div>
+                </section>
+
+                <!-- Page 5: Artist Deep Dive -->
+                <section id="page-artists" class="page-section">
+                    <div class="artist-selection-view">
+                        <div id="artist-songs-container">
+                            <!-- Search and Artist Grid injected by JS -->
+                        </div>
+                    </div>
+
+                    <div id="artist-detail-view" class="hidden">
+                        <div id="artist-detail-view-content">
+                            <!-- Detail content injected by JS -->
+                        </div>
+                    </div>
+                </section>
+            </div>
         </main>
     </div>
-    
-    <!-- Scripts D3 -->
+
+    <!-- Tooltips (Moved to body to avoid positioning issues with transforms) -->
+    <div id="scatter-tooltip" class="tooltip"></div>
+    <div id="popularity-tooltip" class="tooltip"></div>
+
+    <!-- Custom Modal -->
+    <div id="custom-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <p id="modal-message"></p>
+            <button id="modal-ok-btn" class="btn-secondary">OK</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="js/utils.js"></script>
+    <script src="js/router.js"></script> <!-- New Router -->
     <script src="js/filters.js"></script>
     <script src="js/scatterplot.js"></script>
     <script src="js/timeline.js"></script>
@@ -102,4 +142,5 @@
     <script src="js/radar.js"></script>
     <script src="js/main.js"></script>
 </body>
+
 </html>

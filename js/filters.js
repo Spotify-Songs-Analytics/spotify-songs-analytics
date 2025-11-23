@@ -1,31 +1,31 @@
 function initializeFilters() {
     const allGenres = getUniqueGenres(appState.data);
-        
+
     // Limitar a top 20 géneros mais comuns (por contagem)
     const genreCount = d3.rollup(
         appState.data,
         v => v.length,
         d => d.genre
     );
-    
+
     const topGenres = [...genreCount.entries()]
         .sort((a, b) => b[1] - a[1])
         .slice(0, 20)
         .map(d => d[0]);
-    
-    
+
+
     // Criar checkboxes de géneros
     const genreContainer = d3.select('#genre-filters');
     genreContainer.selectAll('*').remove(); // Limpar antes
-    
+
     topGenres.forEach(genre => {
         const label = genreContainer.append('label')
             .attr('class', 'genre-checkbox');
-        
+
         label.append('input')
             .attr('type', 'checkbox')
             .attr('value', genre)
-            .on('change', function() {
+            .on('change', function () {
                 if (this.checked) {
                     appState.selectedGenres.push(genre);
                 } else {
@@ -33,19 +33,19 @@ function initializeFilters() {
                 }
                 updateAllVisualizations();
             });
-        
+
         label.append('span')
             .style('color', genreColors[genre] || '#888')
             .text(` ${genre}`);
     });
-    
+
     // Slider de popularidade
-    d3.select('#popularity-slider').on('input', function() {
+    d3.select('#popularity-slider').on('input', function () {
         appState.minPopularity = +this.value;
         d3.select('#popularity-value').text(this.value + '+');
         updateAllVisualizations();
     });
-    
+
     // Adicionar filtro de ano
     const yearFilterHTML = `
         <div class="filter-group">
@@ -55,21 +55,21 @@ function initializeFilters() {
             <span id="year-range-display">2000 - 2023</span>
         </div>
     `;
-    d3.select('.sidebar').insert('div', '#reset-filters')
+    d3.select('#sidebar-filters').insert('div', '#reset-filters')
         .html(yearFilterHTML);
-    
-    d3.select('#year-min').on('input', function() {
+
+    d3.select('#year-min').on('input', function () {
         appState.yearRange[0] = +this.value;
         d3.select('#year-range-display').text(`${appState.yearRange[0]} - ${appState.yearRange[1]}`);
         updateAllVisualizations();
     });
-    
-    d3.select('#year-max').on('input', function() {
+
+    d3.select('#year-max').on('input', function () {
         appState.yearRange[1] = +this.value;
         d3.select('#year-range-display').text(`${appState.yearRange[0]} - ${appState.yearRange[1]}`);
         updateAllVisualizations();
     });
-    
+
     // Reset filters
     d3.select('#reset-filters').on('click', () => {
         appState.selectedGenres = [];
@@ -81,6 +81,23 @@ function initializeFilters() {
         d3.select('#year-min').property('value', 2000);
         d3.select('#year-max').property('value', 2023);
         d3.select('#year-range-display').text('2000 - 2023');
+
+        // Clear artist selection if on artist page
+        if (typeof selectedArtistForSongs !== 'undefined') {
+            selectedArtistForSongs = null;
+        }
+
         updateAllVisualizations();
     });
+
+    // Accordion functionality for genre filter
+    const genreAccordionHeader = document.getElementById('genre-accordion-header');
+    const genreAccordionContent = document.getElementById('genre-filters');
+
+    if (genreAccordionHeader && genreAccordionContent) {
+        genreAccordionHeader.addEventListener('click', function () {
+            this.classList.toggle('collapsed');
+            genreAccordionContent.classList.toggle('collapsed');
+        });
+    }
 }
