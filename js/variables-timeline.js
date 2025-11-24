@@ -33,8 +33,8 @@ function createVariablesTimeline() {
         const minAvailable = 2000; // Dataset minimum
         const maxAvailable = 2023; // Dataset maximum
 
-        displayYearRange[0] = Math.max(minAvailable, appState.yearRange[0] - 1);
-        displayYearRange[1] = Math.min(maxAvailable, appState.yearRange[1] + 1);
+        displayYearRange[0] = Math.max(minAvailable, displayYearRange[0] - 1);
+        displayYearRange[1] = Math.min(maxAvailable, displayYearRange[1] + 1);
     }
 
 

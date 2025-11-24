@@ -260,7 +260,6 @@ function updateAllVisualizations() {
     updateScatterplot();
     updateTimeline();
     updateVariablesTimeline();
-    updatePopularityScatter();
 
 }
 

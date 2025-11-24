@@ -82,12 +82,26 @@ function initializeFilters() {
 
     d3.select('#year-min').on('input', function () {
         appState.yearRange[0] = +this.value;
+        // Normalize: ensure [0] <= [1]
+        if (appState.yearRange[0] > appState.yearRange[1]) {
+            [appState.yearRange[0], appState.yearRange[1]] = [appState.yearRange[1], appState.yearRange[0]];
+            // Update slider positions to match swapped values
+            d3.select('#year-min').property('value', appState.yearRange[0]);
+            d3.select('#year-max').property('value', appState.yearRange[1]);
+        }
         d3.select('#year-range-display').text(`${appState.yearRange[0]} - ${appState.yearRange[1]}`);
         updateAllVisualizations();
     });
 
     d3.select('#year-max').on('input', function () {
         appState.yearRange[1] = +this.value;
+        // Normalize: ensure [0] <= [1]
+        if (appState.yearRange[0] > appState.yearRange[1]) {
+            [appState.yearRange[0], appState.yearRange[1]] = [appState.yearRange[1], appState.yearRange[0]];
+            // Update slider positions to match swapped values
+            d3.select('#year-min').property('value', appState.yearRange[0]);
+            d3.select('#year-max').property('value', appState.yearRange[1]);
+        }
         d3.select('#year-range-display').text(`${appState.yearRange[0]} - ${appState.yearRange[1]}`);
         updateAllVisualizations();
     });
