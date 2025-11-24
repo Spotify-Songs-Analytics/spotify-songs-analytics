@@ -21,9 +21,9 @@
                 <h2>SpotyStats</h2>
             </div>
             <ul class="nav-links">
-                <li><a href="#" data-page="energy-danceability" class="active">Energy vs Danceability</a></li>
-                <li><a href="#" data-page="evolution">Evolution Over Time</a></li>
-
+                <li><a href="#" data-page="energy-danceability">Energy vs. Danceability</a></li>
+                <li><a href="#" data-page="genre-evolution">Number of Songs Over Time</a></li>
+                <li><a href="#" data-page="variables-evolution">Music Variables Over Time</a></li>
                 <li><a href="#" data-page="artist-comparison">Artist Comparison</a></li>
                 <li><a href="#" data-page="artists">Artist Deep Dive</a></li>
             </ul>
@@ -66,14 +66,18 @@
                     </div>
                 </section>
 
-                <!-- Page 2: Evolution Over Time -->
-                <section id="page-evolution" class="page-section">
-                    <div class="visualization-card">
-                        <h3>Genre Evolution Over Time</h3>
+                <!-- Page 2: Genre Evolution Over Time -->
+                <section id="page-genre-evolution" class="page-section">
+                    <div class="visualization-card full-height">
+                        <h3>Evolution of Number of Songs per Genre</h3>
                         <div id="timeline"></div>
                     </div>
-                    <div class="visualization-card">
-                        <h3>Music Variables Evolution Over Time</h3>
+                </section>
+
+                <!-- Page 3: Music Variables Evolution Over Time -->
+                <section id="page-variables-evolution" class="page-section">
+                    <div class="visualization-card full-height">
+                        <h3>Music Variables Evolution</h3>
                         <div id="variables-timeline"></div>
                     </div>
                 </section>

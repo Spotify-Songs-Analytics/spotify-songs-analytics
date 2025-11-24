@@ -16,12 +16,19 @@ class Router {
                     if (typeof createScatterplot === 'function') createScatterplot();
                 }
             },
-            'evolution': {
-                title: 'Evolution Over Time',
-                subtitle: 'Tracking how genres and musical variables have changed from 2000 to 2023.',
+            'genre-evolution': {
+                title: 'Genre Evolution Over Time',
+                subtitle: 'Tracking how genres have evolved from 2000 to 2023.',
                 showFilters: true,
                 init: () => {
                     if (typeof createTimeline === 'function') createTimeline();
+                }
+            },
+            'variables-evolution': {
+                title: 'Music Variables Evolution',
+                subtitle: 'Tracking how musical characteristics have changed from 2000 to 2023.',
+                showFilters: true,
+                init: () => {
                     if (typeof createVariablesTimeline === 'function') createVariablesTimeline();
                 }
             },

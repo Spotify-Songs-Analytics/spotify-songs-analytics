@@ -24,8 +24,33 @@ function createTimeline() {
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
     // Agregar dados por ano e género
+    // Expand year range if too small (1-2 years) to show context
+    let displayYearRange = [...appState.yearRange];
+    if (displayYearRange[0] > displayYearRange[1]) {
+        displayYearRange = [displayYearRange[1], displayYearRange[0]];
+    }
+
+    const selectedYearSpan = displayYearRange[1] - displayYearRange[0];
+
+    if (selectedYearSpan <= 1) {
+        const minAvailable = 2000; // Dataset minimum
+        const maxAvailable = 2023; // Dataset maximum
+
+        displayYearRange[0] = Math.max(minAvailable, appState.yearRange[0] - 1);
+        displayYearRange[1] = Math.min(maxAvailable, appState.yearRange[1] + 1);
+    }
+
+    // Filter data using the expanded year range for display
+    const displayData = appState.data.filter(d => {
+        const genreMatch = appState.selectedGenres.length === 0 ||
+            appState.selectedGenres.some(g => d.genre === g.toLowerCase());
+        const popularityMatch = d.popularity >= appState.minPopularity;
+        const yearMatch = d.year >= displayYearRange[0] && d.year <= displayYearRange[1];
+        return genreMatch && popularityMatch && yearMatch;
+    });
+
     const yearGenreData = d3.rollup(
-        appState.filteredData,
+        displayData,
         v => v.length,
         d => d.year,
         d => d.genre
@@ -33,7 +58,7 @@ function createTimeline() {
 
     // Get top 20 genres (same as filter sidebar) instead of all genres
     const genreTotals = d3.rollup(
-        appState.filteredData,
+        displayData,
         v => v.length,
         d => d.genre
     );
