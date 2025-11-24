@@ -9,7 +9,7 @@ class Router {
 
         this.pages = {
             'energy-danceability': {
-                title: 'Energy vs. Danceability',
+                title: 'Energy vs. Danceability with Popularity',
                 subtitle: 'Exploring the relationship between energy and danceability across genres.',
                 showFilters: true,
                 init: () => {
