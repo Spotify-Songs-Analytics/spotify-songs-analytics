@@ -213,9 +213,15 @@ function createVariablesTimeline() {
     });
 
     // Eixos
+    // Calculate number of ticks based on year span to avoid duplicates
+    const minYear = d3.min(yearData, d => d[0]);
+    const maxYear = d3.max(yearData, d => d[0]);
+    const yearSpan = maxYear - minYear;
+    const numTicks = Math.min(yearSpan, 15);
+
     const xAxis = d3.axisBottom(varTimelineXScale)
         .tickFormat(d3.format('d'))
-        .ticks(15);
+        .ticks(numTicks);
 
     variablesTimelineSvg.append('g')
         .attr('class', 'x-axis')

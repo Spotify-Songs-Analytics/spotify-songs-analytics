@@ -261,7 +261,7 @@ function updateAllVisualizations() {
     updateTimeline();
     updateVariablesTimeline();
     updatePopularityScatter();
-    updateArtistSongsView();
+
 }
 
 loadData();

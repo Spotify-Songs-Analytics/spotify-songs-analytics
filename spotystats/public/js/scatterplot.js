@@ -88,6 +88,16 @@ function createScatterplot() {
         .style('font-weight', '600')
         .text('Energy');
 
+    // Add bubble size legend
+    scatterSvg.append('text')
+        .attr('x', width - 10)
+        .attr('y', 15)
+        .attr('fill', '#B3B3B3')
+        .attr('text-anchor', 'end')
+        .style('font-size', '12px')
+        .style('font-style', 'italic')
+        .text('Bubble size = Popularity');
+
     updateScatterplot();
 }
 

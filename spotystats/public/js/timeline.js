@@ -45,9 +45,18 @@ function createTimeline() {
 
     // Preparar dados por género com TOTAIS CUMULATIVOS
     const years = Array.from(yearGenreData.keys()).sort((a, b) => a - b);
+    const minYear = d3.min(years);
+    const maxYear = d3.max(years);
 
     const genreData = topGenres.map(genre => {
-        let cumulativeCount = 0;
+        // Calculate base count from ALL data prior to the filtered range
+        // This ensures the line starts at the correct cumulative value, not 0
+        const baseCount = appState.data
+            .filter(d => d.genre === genre && d.year < minYear)
+            .length;
+
+        let cumulativeCount = baseCount;
+
         const values = years.map(year => {
             const yearData = yearGenreData.get(year) || new Map();
             const yearCount = yearData.get(genre) || 0;
@@ -93,12 +102,16 @@ function createTimeline() {
         .style('stroke', '#444');
 
     // Eixo X
+    // Calculate number of ticks based on year span to avoid duplicates
+    const yearSpan = maxYear - minYear;
+    const numTicks = Math.min(yearSpan, 12);
+
     timelineSvg.append('g')
         .attr('class', 'x-axis')
         .attr('transform', `translate(0,${height})`)
         .call(d3.axisBottom(timelineXScale)
             .tickFormat(d3.format('d'))
-            .ticks(12))
+            .ticks(numTicks))
         .selectAll('text')
         .style('fill', '#B3B3B3')
         .style('font-size', '13px');
