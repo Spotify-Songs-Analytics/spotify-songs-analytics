@@ -2,17 +2,16 @@ const fs = require("fs");
 const readline = require("readline");
 
 // ---- CONFIG ---- //
-const dataset1_path   = "./public/datasets/data.csv";        // artists = list
-const dataset1_2_path = "./public/datasets/dataset.csv";     // artists = string (or semicolon-separated)
-const dataset2_path   = "./public/datasets/Best Songs on Spotify from 2000-2023.csv"; // title + artist
-const output_path     = "./public/datasets/matched_tracks3.csv";
+const dataset1_path = "./public/datasets/data.csv";
+const dataset1_2_path = "./public/datasets/dataset.csv";
+const dataset2_path = "./public/datasets/Best Songs on Spotify from 2000-2023.csv";
+const output_path = "./public/datasets/matched_tracks3.csv";
 // ---------------- //
 
 function parseCSVLine(line, delimiter) {
   return line.split(delimiter).map(v => v.trim());
 }
 
-// Load dataset1: artists = list
 async function loadDataset1(path) {
   const fileStream = fs.createReadStream(path);
   const rl = readline.createInterface({ input: fileStream });
@@ -38,7 +37,6 @@ async function loadDataset1(path) {
     const title = (obj.name || "").toLowerCase().trim();
     const trackId = obj.id || "";
 
-    // parse artists list from Python-style string
     let artistList = [];
     try {
       artistList = JSON.parse(obj.artists.replace(/'/g, "\""));
@@ -56,7 +54,6 @@ async function loadDataset1(path) {
   return tracks;
 }
 
-// Load dataset2: artists = string (may be semicolon-separated)
 async function loadDataset2(path) {
   const fileStream = fs.createReadStream(path);
   const rl = readline.createInterface({ input: fileStream });
@@ -83,7 +80,6 @@ async function loadDataset2(path) {
     const artistsRaw = (obj.artists || "").trim();
     const trackId = obj.track_id || "";
 
-    // handle multiple artists separated by semicolon
     const artistList = artistsRaw.split(";").map(a => a.toLowerCase().trim());
 
     for (const artist of artistList) {
@@ -96,7 +92,6 @@ async function loadDataset2(path) {
   return tracks;
 }
 
-// Load popular songs dataset
 async function loadPopularSongs(path) {
   const fileStream = fs.createReadStream(path);
   const rl = readline.createInterface({ input: fileStream });
@@ -125,7 +120,6 @@ async function loadPopularSongs(path) {
   return songs;
 }
 
-// Merge datasets
 async function merge() {
   const dataset1 = await loadDataset1(dataset1_path);
   const dataset2 = await loadDataset2(dataset1_2_path);
@@ -141,7 +135,6 @@ async function merge() {
     const artist = (song.artist || "").toLowerCase().trim();
     const key = `${title}||${artist}`;
 
-    // first try dataset1, then dataset2
     const trackId = dataset1.get(key) || dataset2.get(key) || "NOT_FOUND";
     output.push(`${song.title},${song.artist},${trackId}`);
   }
