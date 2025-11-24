@@ -36,8 +36,8 @@ function createTimeline() {
         const minAvailable = 2000; // Dataset minimum
         const maxAvailable = 2023; // Dataset maximum
 
-        displayYearRange[0] = Math.max(minAvailable, appState.yearRange[0] - 1);
-        displayYearRange[1] = Math.min(maxAvailable, appState.yearRange[1] + 1);
+        displayYearRange[0] = Math.max(minAvailable, displayYearRange[0] - 1);
+        displayYearRange[1] = Math.min(maxAvailable, displayYearRange[1] + 1);
     }
 
     // Use filteredData (which already has genre/popularity filters applied)
@@ -51,7 +51,7 @@ function createTimeline() {
                 appState.selectedGenres.some(g => d.genre === g.toLowerCase());
             const popularityMatch = d.popularity >= appState.minPopularity;
             const inExpandedRange = d.year >= displayYearRange[0] && d.year <= displayYearRange[1];
-            const notInOriginalRange = d.year < appState.yearRange[0] || d.year > appState.yearRange[1];
+            const notInOriginalRange = d.year < displayYearRange[0] || d.year > displayYearRange[1];
             return genreMatch && popularityMatch && inExpandedRange && notInOriginalRange;
         });
         displayData.push(...expandedYearData);
