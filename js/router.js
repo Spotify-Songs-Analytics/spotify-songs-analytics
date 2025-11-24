@@ -17,7 +17,7 @@ class Router {
                 }
             },
             'genre-evolution': {
-                title: 'Genre Evolution Over Time',
+                title: 'Genre Evolution',
                 subtitle: 'Tracking how genres have evolved from 2000 to 2023.',
                 showFilters: true,
                 init: () => {
