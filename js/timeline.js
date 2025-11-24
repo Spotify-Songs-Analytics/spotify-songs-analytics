@@ -40,14 +40,22 @@ function createTimeline() {
         displayYearRange[1] = Math.min(maxAvailable, appState.yearRange[1] + 1);
     }
 
-    // Filter data using the expanded year range for display
-    const displayData = appState.data.filter(d => {
-        const genreMatch = appState.selectedGenres.length === 0 ||
-            appState.selectedGenres.some(g => d.genre === g.toLowerCase());
-        const popularityMatch = d.popularity >= appState.minPopularity;
-        const yearMatch = d.year >= displayYearRange[0] && d.year <= displayYearRange[1];
-        return genreMatch && popularityMatch && yearMatch;
-    });
+    // Use filteredData (which already has genre/popularity filters applied)
+    // but expand the year range for better visualization context
+    const displayData = appState.filteredData.map(d => d.year >= displayYearRange[0] && d.year <= displayYearRange[1] ? d : null).filter(d => d !== null);
+
+    // Also include data from expanded years (if any) that match genre/popularity filters
+    if (selectedYearSpan <= 1) {
+        const expandedYearData = appState.data.filter(d => {
+            const genreMatch = appState.selectedGenres.length === 0 ||
+                appState.selectedGenres.some(g => d.genre === g.toLowerCase());
+            const popularityMatch = d.popularity >= appState.minPopularity;
+            const inExpandedRange = d.year >= displayYearRange[0] && d.year <= displayYearRange[1];
+            const notInOriginalRange = d.year < appState.yearRange[0] || d.year > appState.yearRange[1];
+            return genreMatch && popularityMatch && inExpandedRange && notInOriginalRange;
+        });
+        displayData.push(...expandedYearData);
+    }
 
     const yearGenreData = d3.rollup(
         displayData,
@@ -69,26 +77,31 @@ function createTimeline() {
         .map(d => d[0]);
 
     // Preparar dados por género com TOTAIS CUMULATIVOS
-    const years = Array.from(yearGenreData.keys()).sort((a, b) => a - b);
-    const minYear = d3.min(years);
-    const maxYear = d3.max(years);
+    // Create a complete range of years from displayYearRange
+    const allYears = [];
+    for (let year = displayYearRange[0]; year <= displayYearRange[1]; year++) {
+        allYears.push(year);
+    }
+
+    const minYear = displayYearRange[0];
+    const maxYear = displayYearRange[1];
 
     const genreData = topGenres.map(genre => {
-        // Calculate base count from ALL data prior to the filtered range
-        // This ensures the line starts at the correct cumulative value, not 0
+        // Calculate base count from ALL data prior to the display range
         const baseCount = appState.data
             .filter(d => d.genre === genre && d.year < minYear)
             .length;
 
         let cumulativeCount = baseCount;
 
-        const values = years.map(year => {
+        // Create values for ALL years in the range, even if no songs
+        const values = allYears.map(year => {
             const yearData = yearGenreData.get(year) || new Map();
             const yearCount = yearData.get(genre) || 0;
             cumulativeCount += yearCount; // Add to cumulative total
             return {
                 year: year,
-                count: cumulativeCount // Use cumulative instead of per-year
+                count: cumulativeCount // Use cumulative (will stay flat if no new songs)
             };
         });
 
@@ -100,7 +113,7 @@ function createTimeline() {
 
     // Escalas
     timelineXScale = d3.scaleLinear()
-        .domain(d3.extent(years))
+        .domain([minYear, maxYear])
         .range([0, width]);
 
     const maxCount = d3.max(genreData, g => d3.max(g.values, v => v.count));

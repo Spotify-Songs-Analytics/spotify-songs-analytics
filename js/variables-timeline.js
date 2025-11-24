@@ -38,14 +38,22 @@ function createVariablesTimeline() {
     }
 
 
-    // Filter data using the expanded year range for display
-    const displayData = appState.data.filter(d => {
-        const genreMatch = appState.selectedGenres.length === 0 ||
-            appState.selectedGenres.some(g => d.genre === g.toLowerCase());
-        const popularityMatch = d.popularity >= appState.minPopularity;
-        const yearMatch = d.year >= displayYearRange[0] && d.year <= displayYearRange[1];
-        return genreMatch && popularityMatch && yearMatch;
-    });
+    // Use filteredData (which already has genre/popularity filters applied)
+    // but expand the year range for better visualization context
+    const displayData = appState.filteredData.filter(d => d.year >= displayYearRange[0] && d.year <= displayYearRange[1]);
+
+    // Also include data from expanded years (if any) that match genre/popularity filters
+    if (selectedYearSpan <= 1) {
+        const expandedYearData = appState.data.filter(d => {
+            const genreMatch = appState.selectedGenres.length === 0 ||
+                appState.selectedGenres.some(g => d.genre === g.toLowerCase());
+            const popularityMatch = d.popularity >= appState.minPopularity;
+            const inExpandedRange = d.year >= displayYearRange[0] && d.year <= displayYearRange[1];
+            const notInOriginalRange = d.year < appState.yearRange[0] || d.year > appState.yearRange[1];
+            return genreMatch && popularityMatch && inExpandedRange && notInOriginalRange;
+        });
+        displayData.push(...expandedYearData);
+    }
 
     const yearData = d3.rollups(
         displayData,
@@ -59,6 +67,39 @@ function createVariablesTimeline() {
         d => d.year
     ).sort((a, b) => a[0] - b[0]);
 
+    // Create a complete range of years from displayYearRange
+    const allYears = [];
+    for (let year = displayYearRange[0]; year <= displayYearRange[1]; year++) {
+        allYears.push(year);
+    }
+
+    // Convert yearData array to a Map for easier lookup
+    const yearDataMap = new Map(yearData);
+
+    // Fill in missing years with previous year's values (or 0 if no previous data)
+    const completeYearData = allYears.map(year => {
+        if (yearDataMap.has(year)) {
+            return [year, yearDataMap.get(year)];
+        } else {
+            // Find the most recent year with data before this year
+            let previousData = null;
+            for (let y = year - 1; y >= displayYearRange[0]; y--) {
+                if (yearDataMap.has(y)) {
+                    previousData = yearDataMap.get(y);
+                    break;
+                }
+            }
+            // Use previous data or zeros if no previous data exists
+            return [year, previousData || {
+                acousticness: 0,
+                danceability: 0,
+                energy: 0,
+                valence: 0,
+                speechiness: 0
+            }];
+        }
+    });
+
     // Variáveis com cores
     const variables = [
         { key: 'acousticness', name: 'Acousticness', color: '#E91E63' },
@@ -70,7 +111,7 @@ function createVariablesTimeline() {
 
     // Escalas
     varTimelineXScale = d3.scaleLinear()
-        .domain([d3.min(yearData, d => d[0]), d3.max(yearData, d => d[0])])
+        .domain([displayYearRange[0], displayYearRange[1]])
         .range([0, width]);
 
     varTimelineYScale = d3.scaleLinear()
@@ -102,7 +143,7 @@ function createVariablesTimeline() {
 
     // Desenhar áreas e linhas para cada variável
     variables.forEach((variable, index) => {
-        const lineData = yearData.map(d => ({
+        const lineData = completeYearData.map(d => ({
             year: d[0],
             value: d[1][variable.key]
         }));
@@ -239,8 +280,8 @@ function createVariablesTimeline() {
 
     // Eixos
     // Calculate number of ticks based on year span to avoid duplicates
-    const minYear = d3.min(yearData, d => d[0]);
-    const maxYear = d3.max(yearData, d => d[0]);
+    const minYear = displayYearRange[0];
+    const maxYear = displayYearRange[1];
     const yearSpan = maxYear - minYear;
     const numTicks = Math.min(yearSpan, 15);
 
