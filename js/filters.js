@@ -43,6 +43,22 @@ function initializeFilters() {
     // Popularity slider (if present)
     const popSlider = d3.select('#popularity-slider');
     if (!popSlider.empty()) {
+        // Calculate min and max popularity from dataset
+        const minPop = d3.min(appState.data, d => d.popularity) || 0;
+        const maxPop = d3.max(appState.data, d => d.popularity) || 100;
+
+        // Update slider attributes
+        popSlider
+            .attr('min', minPop)
+            .attr('max', maxPop)
+            .attr('value', minPop);
+
+        // Update display
+        d3.select('#popularity-value').text(minPop + '+');
+
+        // Set initial state
+        appState.minPopularity = minPop;
+
         popSlider.on('input', function () {
             appState.minPopularity = +this.value;
             d3.select('#popularity-value').text(this.value + '+');
@@ -79,14 +95,15 @@ function initializeFilters() {
     // Reset filters
     d3.select('#reset-filters').on('click', () => {
         appState.selectedGenres = [];
-        appState.minPopularity = 0;
+        const minPop = d3.min(appState.data, d => d.popularity) || 0;
+        appState.minPopularity = minPop;
         appState.yearRange = [2000, 2023];
         d3.selectAll('.genre-checkbox input').property('checked', false);
         // Reset popularity slider if it exists
         const popSlider = d3.select('#popularity-slider');
         if (!popSlider.empty()) {
-            popSlider.property('value', 0);
-            d3.select('#popularity-value').text('0+');
+            popSlider.property('value', minPop);
+            d3.select('#popularity-value').text(minPop + '+');
         }
         d3.select('#year-min').property('value', 2000);
         d3.select('#year-max').property('value', 2023);

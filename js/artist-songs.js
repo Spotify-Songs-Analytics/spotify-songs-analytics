@@ -30,7 +30,8 @@ function createArtistSongsView(selectedArtist) {
         .attr('class', 'artist-search-container')
         .style('margin-bottom', '24px')
         .style('display', 'flex')
-        .style('gap', '12px');
+        .style('gap', '12px')
+        .style('align-items', 'center');
 
     const searchInput = searchContainer.append('input')
         .attr('type', 'text')
@@ -44,27 +45,101 @@ function createArtistSongsView(selectedArtist) {
         .style('flex-grow', '1')
         .style('font-size', '16px');
 
+    // --- Sorting Toggle ---
+    let sortBy = 'alpha'; // 'alpha' or 'count'
+
+    const sortContainer = searchContainer.append('div')
+        .style('display', 'flex')
+        .style('background', '#282828')
+        .style('border', '1px solid #404040')
+        .style('border-radius', '24px')
+        .style('padding', '4px')
+        .style('height', '46px')
+        .style('align-items', 'center');
+
+    const sortAlphaBtn = sortContainer.append('button')
+        .attr('class', 'sort-btn active')
+        .style('background', '#1DB954')
+        .style('color', '#fff')
+        .style('border', 'none')
+        .style('border-radius', '20px')
+        .style('padding', '8px 16px')
+        .style('cursor', 'pointer')
+        .style('font-weight', 'bold')
+        .style('transition', 'all 0.2s')
+        .text('A')
+        .on('click', function () {
+            if (sortBy !== 'alpha') {
+                sortBy = 'alpha';
+                updateSortButtons();
+                renderArtistCards(searchInput.property('value'));
+            }
+        });
+
+    const sortCountBtn = sortContainer.append('button')
+        .attr('class', 'sort-btn')
+        .style('background', 'transparent')
+        .style('color', '#B3B3B3')
+        .style('border', 'none')
+        .style('border-radius', '20px')
+        .style('padding', '8px 16px')
+        .style('cursor', 'pointer')
+        .style('font-weight', 'bold')
+        .style('transition', 'all 0.2s')
+        .text('#')
+        .on('click', function () {
+            if (sortBy !== 'count') {
+                sortBy = 'count';
+                updateSortButtons();
+                renderArtistCards(searchInput.property('value'));
+            }
+        });
+
+    function updateSortButtons() {
+        if (sortBy === 'alpha') {
+            sortAlphaBtn.style('background', '#1DB954').style('color', '#fff');
+            sortCountBtn.style('background', 'transparent').style('color', '#B3B3B3');
+        } else {
+            sortAlphaBtn.style('background', 'transparent').style('color', '#B3B3B3');
+            sortCountBtn.style('background', '#1DB954').style('color', '#fff');
+        }
+    }
+
     // --- Artist List Container ---
     const artistsListContainer = container.append('div')
         .attr('class', 'artists-list-grid');
 
-    // Get all unique artists sorted alphabetically from FILTERED data
-    const allArtists = Array.from(new Set(appState.filteredData.map(d => d.artist))).sort();
+    // Get all unique artists from FULL data
+    // We'll sort them inside renderArtistCards
+    const allArtists = Array.from(new Set(appState.data.map(d => d.artist)));
+
+    // Pre-calculate song counts for sorting efficiency
+    const artistSongCounts = new Map();
+    allArtists.forEach(artist => {
+        artistSongCounts.set(artist, appState.data.filter(d => d.artist === artist).length);
+    });
 
     // Function to render artist cards
     function renderArtistCards(filterText = '') {
         artistsListContainer.html(''); // Clear list
 
-        const filteredArtists = allArtists.filter(artist =>
+        let filteredArtists = allArtists.filter(artist =>
             artist.toLowerCase().includes(filterText.toLowerCase())
         );
+
+        // Sort based on current mode
+        if (sortBy === 'alpha') {
+            filteredArtists.sort((a, b) => a.localeCompare(b));
+        } else {
+            filteredArtists.sort((a, b) => artistSongCounts.get(b) - artistSongCounts.get(a));
+        }
 
         if (filteredArtists.length === 0) {
             artistsListContainer.append('p')
                 .style('color', '#b3b3b3')
                 .style('grid-column', '1 / -1')
                 .style('text-align', 'center')
-                .text('No artists found matching your search (or filters).');
+                .text('No artists found matching your search.');
             return;
         }
 
@@ -94,8 +169,8 @@ function createArtistSongsView(selectedArtist) {
             card.append('h4')
                 .text(artist);
 
-            // Count songs for this artist in FILTERED data
-            const songCount = appState.filteredData.filter(d => d.artist === artist).length;
+            // Count songs for this artist in FULL data
+            const songCount = artistSongCounts.get(artist);
 
             card.append('p')
                 .text(`${songCount} songs`);
@@ -133,11 +208,59 @@ function showArtistDetails(artist) {
         .html('← Back to Artists')
         .on('click', () => hideArtistDetail()); // Call hideArtistDetail to go back to the list
 
-    // Header
-    container.append('h2')
-        .attr('id', 'selected-artist-name') // Keep the ID for consistency if other parts of the app use it
-        .style('margin-bottom', '10px')
-        .text(artist);
+    // Header Container
+    const headerContainer = container.append('div')
+        .style('display', 'flex')
+        .style('justify-content', 'space-between')
+        .style('align-items', 'center')
+        .style('margin-bottom', '20px');
+
+    // Get artist songs from FULL data
+    const songs = appState.data
+        .filter(d => d.artist === artist);
+
+    // Artist Name
+    headerContainer.append('h2')
+        .attr('id', 'selected-artist-name')
+        .style('margin', '0')
+        .text(`${artist} - ${songs.length} songs`);
+
+    // Sorting Control
+    const sortContainer = headerContainer.append('div')
+        .style('display', 'flex')
+        .style('align-items', 'center')
+        .style('gap', '8px');
+
+    sortContainer.append('span')
+        .style('color', '#B3B3B3')
+        .style('font-size', '14px')
+        .text('Sort by:');
+
+    const sortSelect = sortContainer.append('select')
+        .style('background', '#282828')
+        .style('color', '#fff')
+        .style('border', '1px solid #404040')
+        .style('border-radius', '4px')
+        .style('padding', '6px 12px')
+        .style('cursor', 'pointer')
+        .on('change', function () {
+            renderSongList(this.value);
+        });
+
+    const sortOptions = [
+        { value: 'popularity', label: 'Popularity' },
+        { value: 'energy', label: 'Energy' },
+        { value: 'danceability', label: 'Dance' },
+        { value: 'valence', label: 'Mood' },
+        { value: 'acousticness', label: 'Acoustic' },
+        { value: 'name', label: 'Alphabetical' }
+    ];
+
+    sortOptions.forEach(opt => {
+        sortSelect.append('option')
+            .attr('value', opt.value)
+            .text(opt.label);
+    });
 
     // Layout Grid
     const contentGrid = container.append('div')
@@ -156,70 +279,85 @@ function showArtistDetails(artist) {
         .attr('id', 'spotify-iframe-container')
         .html('<p class="placeholder-text">Select a song to preview</p>');
 
-    // Get artist songs from FILTERED data
-    const songs = appState.filteredData
-        .filter(d => d.artist === artist)
-        .sort((a, b) => b.popularity - a.popularity);
 
-    songs.forEach(song => {
-        const item = songList.append('div')
-            .attr('class', 'song-item')
-            .on('click', function () {
-                // Highlight active song
-                d3.selectAll('.song-item').classed('active', false);
-                d3.select(this).classed('active', true);
-                updateSpotifyIframe(song);
-            });
 
-        const info = item.append('div').attr('class', 'song-info');
-        info.append('div').attr('class', 'song-title').text(song.name);
-        info.append('div').attr('class', 'song-meta')
-            .text(`${song.year} • Popularity: ${song.popularity}`);
+    // Function to render sorted song list
+    function renderSongList(sortBy = 'popularity') {
+        songList.html(''); // Clear list
 
-        // Enhanced Metrics Visualization
-        const metricsRow = item.append('div')
-            .style('display', 'flex')
-            .style('gap', '12px')
-            .style('margin-top', '8px');
-
-        const metrics = [
-            { key: 'energy', label: 'Energy', color: '#FFD700' },       // Gold
-            { key: 'danceability', label: 'Dance', color: '#FF69B4' },  // Hot Pink
-            { key: 'valence', label: 'Mood', color: '#00CED1' },        // Dark Turquoise
-            { key: 'acousticness', label: 'Acoustic', color: '#32CD32' } // Lime Green
-        ];
-
-        metrics.forEach(m => {
-            const mContainer = metricsRow.append('div')
-                .style('flex', '1')
-                .style('display', 'flex')
-                .style('flex-direction', 'column')
-                .style('gap', '2px');
-
-            // Label and Value
-            const header = mContainer.append('div')
-                .style('display', 'flex')
-                .style('justify-content', 'space-between')
-                .style('font-size', '10px')
-                .style('color', '#b3b3b3');
-
-            header.append('span').text(m.label);
-            header.append('span').text(`${(song[m.key] * 100).toFixed(0)}%`);
-
-            // Bar Background
-            const barBg = mContainer.append('div')
-                .style('height', '6px')
-                .style('background', '#404040')
-                .style('border-radius', '3px')
-                .style('overflow', 'hidden');
-
-            // Bar Fill
-            barBg.append('div')
-                .style('height', '100%')
-                .style('width', `${song[m.key] * 100}%`)
-                .style('background-color', m.color);
+        // Sort songs
+        const sortedSongs = [...songs].sort((a, b) => {
+            if (sortBy === 'name') {
+                return a.name.localeCompare(b.name);
+            } else {
+                // For metrics, sort descending
+                return b[sortBy] - a[sortBy];
+            }
         });
-    });
+
+        sortedSongs.forEach(song => {
+            const item = songList.append('div')
+                .attr('class', 'song-item')
+                .on('click', function () {
+                    // Highlight active song
+                    d3.selectAll('.song-item').classed('active', false);
+                    d3.select(this).classed('active', true);
+                    updateSpotifyIframe(song);
+                });
+
+            const info = item.append('div').attr('class', 'song-info');
+            info.append('div').attr('class', 'song-title').text(song.name);
+            info.append('div').attr('class', 'song-meta')
+                .text(`${song.year} • Popularity: ${song.popularity}`);
+
+            // Enhanced Metrics Visualization
+            const metricsRow = item.append('div')
+                .style('display', 'flex')
+                .style('gap', '12px')
+                .style('margin-top', '8px');
+
+            const metrics = [
+                { key: 'energy', label: 'Energy', color: '#FFD700' },       // Gold
+                { key: 'danceability', label: 'Dance', color: '#FF69B4' },  // Hot Pink
+                { key: 'valence', label: 'Mood', color: '#00CED1' },        // Dark Turquoise
+                { key: 'acousticness', label: 'Acoustic', color: '#32CD32' } // Lime Green
+            ];
+
+            metrics.forEach(m => {
+                const mContainer = metricsRow.append('div')
+                    .style('flex', '1')
+                    .style('display', 'flex')
+                    .style('flex-direction', 'column')
+                    .style('gap', '2px');
+
+                // Label and Value
+                const header = mContainer.append('div')
+                    .style('display', 'flex')
+                    .style('justify-content', 'space-between')
+                    .style('font-size', '10px')
+                    .style('color', '#b3b3b3');
+
+                header.append('span').text(m.label);
+                header.append('span').text(`${(song[m.key] * 100).toFixed(0)}%`);
+
+                // Bar Background
+                const barBg = mContainer.append('div')
+                    .style('height', '6px')
+                    .style('background', '#404040')
+                    .style('border-radius', '3px')
+                    .style('overflow', 'hidden');
+
+                // Bar Fill
+                barBg.append('div')
+                    .style('height', '100%')
+                    .style('width', `${song[m.key] * 100}%`)
+                    .style('background-color', m.color);
+            });
+        });
+    }
+
+    // Initial render (default: popularity)
+    renderSongList('popularity');
 }
 
 function getMetricColor(metric) {
